@@ -45,7 +45,7 @@ Les mots de passe sont générés à la création de chaque instance. La base et
 ## Données et documentation
 
 - [Guide des modules et installation institutionnelle](atlas-education/README.md)
-- [Lire le rapport scientifique illustré en PDF](outputs/Rapport-scientifique-Atlas-2050.pdf) ou [ouvrir sa version Word](outputs/Rapport-scientifique-Atlas-2050.docx)
+- [Lire le rapport scientifique illustré en PDF](outputs/Rapport-scientifique-Atlas-2050.pdf) ou [ouvrir sa version Word](outputs/Rapport-scientifique-Atlas-2050.docx). Ses 15 pages suivent les sept parties du défi, avec sept captures d’Atlas et un graphique des projections.
 - [Consulter les résultats des trois scénarios dans Excel](outputs/Defi-2050/Atlas-primaire-public-2050.xlsx)
 - [Télécharger les résultats nationaux, régionaux et provinciaux et les hypothèses](outputs/Defi-2050/)
 - [Reproduire les calculs et la vérification des modules](atlas-education/README.md#défi-de-planification-à-lhorizon-2050)

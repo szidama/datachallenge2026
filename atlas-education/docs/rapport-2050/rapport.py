@@ -1,6 +1,7 @@
 """Compose le rapport scientifique PDF ou Word à partir d’une même édition du calcul Atlas."""
 import argparse
 import json
+import os
 from pathlib import Path
 from xml.sax.saxutils import escape
 
@@ -25,8 +26,9 @@ W,H=A4
 M=47
 INNER=W-2*M
 NAMES={"bas":"Basse","central":"Centrale","haut":"Haute"}
-PAGES = 14
-TREND_CAPTION = ("Figure 2. Inscriptions du primaire public. La ligne sombre représente les observations PRI02. "
+PAGES = 15
+EDITION = "https://github.com/szidama/datachallenge2026/tree/188dd58ba1e444603d3aeace54ef217503719ff6"
+TREND_CAPTION = ("Figure 4. Inscriptions du primaire public. La ligne sombre représente les observations PRI02. "
                  "À partir de 2025, les traits bleu court, vert continu et rouge long indiquent respectivement "
                  "les demandes basse, centrale et haute. L’axe horizontal indique l’année de fin de l’année scolaire.")
 
@@ -39,10 +41,12 @@ def figure_path(name):
 def register():
     mac=Path("/System/Library/Fonts/Supplemental")
     linux=Path("/usr/share/fonts/truetype/dejavu")
-    for name,mac_name,linux_name in [
-        ("Texte","Arial.ttf","DejaVuSans.ttf"),("Gras","Arial Bold.ttf","DejaVuSans-Bold.ttf"),
-        ("Titre","Georgia.ttf","DejaVuSerif.ttf"),("Italique","Georgia Italic.ttf","DejaVuSerif-Italic.ttf")]:
-        path=mac/mac_name if (mac/mac_name).exists() else linux/linux_name
+    windows=Path(os.environ.get("WINDIR","C:/Windows"))/"Fonts"
+    for name,mac_name,linux_name,windows_name in [
+        ("Texte","Arial.ttf","DejaVuSans.ttf","arial.ttf"),("Gras","Arial Bold.ttf","DejaVuSans-Bold.ttf","arialbd.ttf"),
+        ("Titre","Georgia.ttf","DejaVuSerif.ttf","georgia.ttf"),("Italique","Georgia Italic.ttf","DejaVuSerif-Italic.ttf","georgiai.ttf"),
+        ("Code","Courier New.ttf","DejaVuSansMono.ttf","cour.ttf")]:
+        path=next((p for p in (mac/mac_name,windows/windows_name) if p.is_file()),linux/linux_name)
         pdfmetrics.registerFont(TTFont(name,str(path)))
     pdfmetrics.registerFontFamily("Texte", normal="Texte", bold="Gras", italic="Italique", boldItalic="Gras")
 
@@ -100,6 +104,11 @@ class Report:
 
     def formula(self,text):
         self.p(text,"Titre",14,20,GREEN,8)
+
+    def code(self,lines):
+        for line in lines:
+            self.p(escape(line),"Code",8.8,13,INK,0)
+        self.y-=8
 
     def table(self,headers,rows,widths,align_right=(),size=9):
         assert abs(sum(widths)-1)<.001
@@ -188,7 +197,7 @@ def write(data,path):
     a.h("Calendrier de lecture")
     a.p("2025 fixe la base scolaire. 2030 sert de premier jalon de programmation. 2035 marque la fin des projections démographiques mobilisées. Les jalons 2040, 2045 et 2050 prolongent les trois trajectoires scolaires.")
     a.note("Clé de lecture. L’année 2050 désigne l’année scolaire 2049/2050. Les scénarios bas, central et haut portent sur la demande. Pour chacun, la référence et l’intervention combinée décrivent deux politiques de ressources.")
-    a.note("Parcours du rapport. Données p. 2–3 · Préparation p. 4–5 · Méthode p. 6–8 · Résultats p. 9–11 · Réponse au défi p. 12–13 · Reproduction p. 14.")
+    a.note("Plan. Le défi p. 1 · Les données p. 2–3 · La préparation p. 4–6 · La méthode p. 7–9 · Les résultats p. 10–12 · La réponse au défi p. 13–14 · Reproduction p. 15.")
 
     a.page("02","Les données","Le point de départ scolaire","Les inscriptions nationales et les ressources provinciales proviennent de deux collections rapprochées sur le même millésime.")
     a.h("Le classeur du Data Challenge")
@@ -224,18 +233,31 @@ def write(data,path):
       ["Contenus extérieurs aux tableaux","18 signalements","Isoler le texte et conserver son empreinte."],
       ["Indice de parité incohérent","1 signalement","Conserver l’indice publié avec son signalement."],
       ["Nouvel import des mêmes données","Identique","Associer la version à l’empreinte du fichier." ]],[.34,.23,.43])
+    a.image("qualite-import","Figure 1. Écran « Données et qualité » après import du classeur. Le compteur d’écarts statistiques isole l’indice de parité à examiner. Les 18 textes hors tableaux sont répertoriés séparément dans le journal des contrôles.",66)
     a.h("Lire un ratio dans son périmètre")
     a.p("Le rapport élèves par salle divise les élèves du primaire public d’une province par ses salles publiques recensées dans la même année. Le rapport élèves par enseignant utilise les maîtres chargés de cours. Le calcul conserve l’absence d’un dénominateur utilisable. Pour une agrégation, on somme d’abord les numérateurs et les dénominateurs.")
     a.formula("En 2025, 2 391 345 ÷ 45 921 ≈ 52,1 élèves par salle.")
     a.p("Le même effectif rapporté aux 44 623 maîtres donne 53,6 élèves par enseignant. Ce diagnostic du stock recensé précède les hypothèses de simulation sur la disponibilité des moyens.")
     a.note("Sources. Classeur du Data Challenge, contrôles de l’import Atlas, et DGESS, "+link(dg+"#page=16","tableau I.1, total national")+". Le journal distingue les anomalies de structure et les données indisponibles.")
 
+    a.page("03","La préparation","Vérifier le point de départ de la projection","La cellule L5 de la feuille Feuil2 permet de contrôler à la fois le public étudié, le millésime et l’unité de la série nationale.")
+    a.h("Retrouver l’observation dans Atlas")
+    a.p("Dans « Données et qualité », ouvrir « Consulter les observations ». Choisir l’origine « Observée », l’année de fin 2025 et le tableau PRI02. Appliquer, puis ouvrir Feuil2!L5. La ligne « National · Ensemble · Public » réunit les filles et les garçons inscrits dans le primaire public en 2024/2025.")
+    a.image("trace-pri02","Figure 2. Détail de PRI02:L5 dans l’instance personnelle d’Atlas. L’écran associe les 2 391 345 élèves à leur cellule, au classeur et à l’empreinte de sa version. La valeur originale apparaît au bas de la fiche.",165)
+    a.h("Trois contrôles sur le même millésime")
+    a.table(["Rapprochement","Calcul ou source","Effectif obtenu"],[
+        ["Sexe, secteur public","1 196 415 garçons + 1 194 930 filles","2 391 345"],
+        ["Statut de l’école","2 391 345 élèves du public + 916 751 du privé","3 308 096"],
+        ["Territoire, secteur public","Somme des effectifs publics des 45 provinces de l’annuaire",num(sum(p["enrolment"] for p in provinces("central")))]],[.26,.52,.22],(2,))
+    a.p("Prendre le total tous statuts de Feuil2!L11 ajouterait 916 751 élèves du privé au point de départ. Pour projeter les besoins du public, Atlas ajuste le modèle sur la série PRI02 du seul secteur public et utilise les effectifs publics de l’annuaire pour la répartition territoriale.")
+    a.note("Sources. Classeur du Data Challenge, Feuil2, cellules L3 à L11. DGESS, "+link(dg+"#page=16","annuaire du primaire 2024–2025, tableau I.1, total national")+".")
+
     a.page("03","La préparation","Raccorder les 45 provinces","La jointure territoriale est contrôlée ligne par ligne entre l’annuaire scolaire, les projections par âge et le répertoire des localités.")
     a.p("Chaque province reçoit la clé de sa région historique. Casse, accents, apostrophes et espaces sont normalisés. Les graphies divergentes ont une correspondance explicite, par exemple « LES BALE » avec Balés et « KOURITTENGA » avec Kouritenga. Les sous-totaux régionaux et la ligne nationale sont écartés du comptage des provinces.")
     a.h("Une anomalie démographique traçable")
     a.p("Dans la fiche de l’Oudalan, la ligne des 6–11 ans de 2031 porte 17 066 hommes, 16 511 femmes et un ensemble imprimé de 17 030. La préparation retient 33 577, somme des deux sexes. Elle conserve le total imprimé, les composantes, l’année et la page. La règle accepte un écart d’arrondi d’une personne. Ce cas est l’unique écart supérieur à un sur les 720 valeurs provinciales.")
     a.note("Source. INSD, "+link(insd+"#page=466","fiche Oudalan, page PDF 466")+". Cette correction de travail reste révisable si l’INSD publie un erratum.")
-    a.image("inventaire-nord","Figure 1. Inventaire du Nord dans l’environnement de test d’Atlas. Au Loroum, 112,3 élèves se partagent une salle en moyenne. « Eau » et « Latrines » comptent les écoles dépourvues de l’équipement. « Hors horizon INSD » signale la fin de la série des 6–11 ans en 2035.",154)
+    a.image("inventaire-nord","Figure 3. Inventaire du Nord dans l’environnement de test d’Atlas. Au Loroum, on compte 112,3 élèves par salle en moyenne. « Eau » et « Latrines » dénombrent les écoles dépourvues de l’équipement. La mention « Hors horizon INSD » rappelle que la série des 6–11 ans s’arrête en 2035.",154)
     a.p("Le total des élèves par province se réconcilie avec les 2 391 345 du primaire public national. Les nombres de salles, d’enseignants et d’écoles équipées se réconcilient séparément aux lignes nationales imprimées. Une collecte régionale qui contredit la marge de l’annuaire bloque ce mode jusqu’à résolution du conflit.")
     a.note("Les nouveaux dossiers conservent les empreintes SHA-256 des trois PDF, les pages de l’inventaire et des équipements, la page des localités et la plage des pages de population.")
 
@@ -244,7 +266,7 @@ def write(data,path):
     a.formula("g(h, φ) = (1 − φ<super>h</super>) / (1 − φ)     ·     D<sub>τ</sub>(t+h) = Y<sub>t</sub> + β<sub>τ</sub> g(h, φ)")
     a.p("Y désigne les inscriptions. Pour chaque quantile τ de 0,20, 0,50 et 0,80, la pente β minimise la somme des pertes asymétriques ρ<sub>τ</sub>(u) = max(τu, (τ − 1)u), avec u égal à la variation observée moins βg. Comme g est positif, le minimum est le quantile pondéré des variations divisées par g, de poids g. Le résultat est arrondi à l’élève entier, avec un plancher à zéro.")
     a.h("Validation à origine glissante")
-    a.p("Chaque ajustement utilise exclusivement le passé de son origine. Les six cibles à un an et cinq à deux ans évaluent le comportement à court terme. La sélection sur la perte quantile moyenne des deux horizons retient φ = 0,95 (103 722 élèves) devant 0,80 (104 003).")
+    a.p("À chaque origine, l’ajustement utilise les années déjà observées. Six cibles à un an et cinq à deux ans servent au choix de l’amortissement et à la comparaison des modèles. La perte quantile moyenne retient φ = 0,95 (103 722 élèves) devant 0,80 (104 003). Une évaluation indépendante demanderait de nouveaux millésimes.")
     stats=data["validation"]
     def score(model,h):return next(r for r in stats if r["model"]==model and r["horizon"]==h)
     a.table(["Modèle","MAE à 1 an","MAE à 2 ans","Biais à 1 an"],[[label,num(score(k,1)["mae"]),num(score(k,2)["mae"]),num(score(k,1)["bias"])] for k,label in [("last","Dernier niveau observé"),("trend","Tendance linéaire"),("damped","Tendance amortie"),("quantile80","Régression quantile, φ = 0,80"),("quantile95","Régression quantile, φ = 0,95")]], [.45,.19,.19,.17],(1,2,3))
@@ -282,7 +304,7 @@ def write(data,path):
     a.note("Les colonnes « Salles » et « Ens. » comptent les salles et les enseignants manquants, en référence (réf.) et après intervention combinée (comb.). La couverture divise les places servies par la demande. Les déficits s’additionnent sur les 13 régions.")
     a.h("Le jalon 2030 dans le scénario central")
     a.p("Pour 2 270 333 inscriptions, l’intervention combinée laisse 12 722 salles et 14 609 enseignants à couvrir en 2030. La référence laisse 12 724 salles et 14 731 enseignants. De 2030 à 2050, la demande centrale baisse, tandis que les pertes de capacité cumulées augmentent le besoin résiduel.")
-    a.image("comparaison-m13","Figure 3. Comparateur public M13, deux éditions de recette du même cycle, du même territoire et du même horizon. M13 lit le scénario enregistré dans chacune des deux publications.",62)
+    a.image("m13-exercice","Figure 5. Comparateur M13 du portail de l’instance personnelle. Les deux éditions d’exercice ont le même périmètre et le même horizon. Le comparateur reprend la trajectoire enregistrée dans chacune.",80)
     diff= national(2050,"haut","combine")["demand"]-national(2050,"bas","combine")["demand"]
     a.p(f"Les trajectoires haute et basse sont séparées de {num(diff)} inscriptions en 2050. Les baisses et les reprises de la série courte, dont le creux de 2022/2023, contribuent à cette amplitude. Seule l’intervention change entre les deux politiques d’une même trajectoire.")
 
@@ -301,7 +323,7 @@ def write(data,path):
     a.page("05","Les résultats","Trois provinces à examiner d’abord","Le diagnostic provincial identifie la pression sur l’inventaire public recensé en 2025, avant toute attribution locale du programme régional.")
     top=sorted(provinces("central"),key=lambda x:-x["rooms_gap"])[:3]
     a.table(["Province","Demande 2050","Salles 2025","Maîtres 2025","Salles manq.","Ens. manq."],[[r["province"],*[num(r[k]) for k in ("demand","rooms","teachers","rooms_gap","teachers_gap")]] for r in top],[.23,.17,.15,.15,.15,.15],(1,2,3,4,5))
-    a.image("diagnostic-provincial","Figure 4. Vue du comparateur d’interventions dans le rôle Analyste. Les 45 provinces sont classées ici par enseignants manquants. Le sélecteur de région et le téléchargement permettent de reprendre les lignes affichées.",344)
+    a.image("diagnostic-provincial","Figure 6. Comparateur d’interventions d’Atlas, profil Analyste. Le classement porte sur les enseignants manquants parmi les 45 provinces. Le filtre régional et le téléchargement permettent de reprendre les lignes affichées.",344)
     a.p("Kadiogo, Houet et Sanmatenga arrivent en tête des deux classements centraux à stocks constants. En scénario haut, leurs déficits atteignent respectivement 5 700, 4 302 et 3 336 salles. En scénario bas, seul le Loroum conserve un déficit de salles (61), tandis que les manques d’enseignants persistent notamment au Loroum (61), au Séno (19) et en Kompienga (3).")
     a.note("Les stocks régionaux intègrent annuellement départs et interventions. La somme des déficits provinciaux à inventaire figé répond à une question différente. La base scolaire figure dans l’"+link(dg+"#page=12","annuaire primaire 2024–2025")+".")
 
@@ -311,7 +333,7 @@ def write(data,path):
     a.p("Le Yatenga compte 166 écoles sans eau potable et 104 sans latrines fonctionnelles en 2025. La Comoé compte 159 écoles sans eau. Le Sanmatenga cumule 121 écoles sans eau et 107 sans latrines fonctionnelles avec le troisième déficit provincial de salles du scénario central. Ces indicateurs peuvent orienter les visites et les dossiers de réhabilitation.")
     a.h("Localiser un investissement")
     a.p("Pour chaque province prioritaire, la direction territoriale peut rapprocher les identifiants et noms d’écoles, les localités INSD et les points OpenStreetMap, puis vérifier les ouvertures avec les rapports ESU. Confronter ensuite les temps de trajet, le foncier, l’eau, les latrines, les qualifications disponibles et les coûts. Une absence dans OpenStreetMap ne suffit pas pour classer une localité en « zone blanche ».")
-    a.image("interventions","Figure 5. Comparateur d’interventions, scénario central, environnement de test. Le programme combiné couvre 21 840 places de plus que la référence. Les coûts non renseignés apparaissent comme indisponibles.",246)
+    a.image("interventions","Figure 7. Comparateur d’interventions, scénario central, environnement de test. Le programme combiné sert 21 840 élèves de plus que la référence. Les coûts non renseignés apparaissent comme indisponibles.",246)
 
     a.page("06","La réponse au défi","Arbitrer entre les trois trajectoires","Une priorité de terrain gagne en solidité lorsqu’elle persiste dans plusieurs hypothèses de demande.")
     a.p("Les Hauts-Bassins figurent parmi les trois premiers déficits d’enseignants dans les trois scénarios. Le Centre est prioritaire pour les salles en demandes basse et centrale. Si la demande suit la trajectoire haute, le Centre-Ouest arrive en tête pour les deux ressources. Une première instruction peut donc porter sur les affectations dans les Hauts-Bassins et sur la capacité à augmenter rapidement l’offre au Centre-Ouest.")
@@ -323,24 +345,25 @@ def write(data,path):
     a.h("Comment interpréter un plafond peu utilisé")
     a.p("Dans le scénario haut, 625 recrutements ouvrent des groupes, tandis que l’algorithme ne livre aucune salle neuve. Cette allocation traduit le critère de gain immédiat et les plafonds annuels. Les 65 910 salles manquantes justifient de chiffrer un programme associant plus de salles et d’enseignants, puis de le tester avec les régions.")
     a.h("Du résultat calculé à sa diffusion")
-    a.image("autorisation-2050.jpg","Figure 6. Registre du portail de travail le 18 novembre 2026. Après vérification des fiches par le validateur métier, l’administrateur a autorisé la diffusion des deux éditions de l’annuaire. La capture fixe l’étape préalable à la mise en ligne.",145)
-    a.p("Le validateur examine les calculs dans M11 puis vérifie la fiche de diffusion. Dans M12, le décideur autorise la diffusion et un autre titulaire assure la publication. Au 18 novembre 2026, ces deux éditions restent autorisées, en attente de mise en ligne. La comparaison de la figure 3 illustre M13 dans l’environnement de test.")
+    a.image("autorisation-2050.jpg","Figure 8. Extrait du registre du portail de travail au 18 novembre 2026. Les deux éditions nationales sont au stade « Diffusion autorisée ». La mention « Mise en ligne attendue » situe précisément l’étape atteinte.",145)
+    a.p("Le validateur examine les calculs dans M11 puis vérifie la fiche de diffusion. Dans M12, le décideur autorise la diffusion et un autre titulaire publie l’édition. La figure 5 a été prise sur le portail de l’instance personnelle, où les éditions d’exercice ont parcouru toutes ces étapes.")
 
-    a.page("07","Reproduction","Refaire et contrôler les calculs","Le classeur d’origine, le référentiel provincial versionné, le moteur de calcul et la recette ordonnée permettent de reproduire les chiffres du rapport.")
-    a.h("1. Rejouer les trajectoires")
-    a.p("Depuis le dossier atlas-education, utiliser Python avec openpyxl conformément au README. La commande ci-dessous écrit les cinq jalons et les trois scénarios. Les CSV peuvent être ouverts dans un tableur, avec point-virgule comme séparateur.")
-    a.note("python3 scripts/reproduire_defi.py ../DONNEES*.xlsx ../outputs/Defi-2050")
-    a.p("Le classeur Excel joint rassemble les résultats des cinq jalons et leurs hypothèses. Les fichiers national.csv, regions.csv et provinces.csv donnent les mêmes résultats en unités. resultats.json conserve les hypothèses, scores historiques, sources et trajectoires. Dans le back-office, ouvrir « Comparateur d’interventions », choisir le primaire public, la source annuaire, le scénario et 2050. L’export du dossier conserve l’exécution.")
-    a.h("2. Reconstruire les données complémentaires")
-    a.p("L’extracteur utilise pdftotext de Poppler sur les trois documents officiels. Obtenir les mêmes fichiers depuis "+link(dg,"la DGESS")+", "+link(insd,"les projections INSD")+" et "+link(local,"le registre des localités")+". Les empreintes complètes figurent dans planning/data/provinces_2025.json. Empreintes abrégées des éditions utilisées ci-dessous.")
-    a.table(["Fichier","SHA-256 · début de l’empreinte"],[
+    a.page("07","Reproduction","Refaire et contrôler les calculs","Le classeur, le référentiel des provinces et les deux bibliothèques Excel sont inclus dans l’édition du dépôt utilisée pour cette étude.")
+    a.h("1. Préparer une copie du dépôt")
+    a.p("Télécharger "+link(EDITION,"Atlas Éducation, version 188dd58")+". Depuis sa racine, lancer python3 demarrer.py preparer, ou py -3 demarrer.py preparer sous Windows. Avec Python 3.10 ou ultérieur et son module venv, cette commande prépare une instance hors ligne. Le moteur utilisé est "+data["version"]+".")
+    a.h("2. Recalculer les cinq jalons et exporter le classeur")
+    a.p("Se placer dans le dossier atlas-education. Ouvrir l’interpréteur du projet avec ../.venv/bin/python sur macOS ou Linux, ou ..\\.venv\\Scripts\\python.exe sous Windows. Y saisir ces trois lignes.")
+    a.code(["from pathlib import Path",
+            "from scripts.reproduire_defi import replay",
+            'replay(next(Path("..").glob("DONNEES*.xlsx")), Path("../resultats-personnels"), excel=True)'])
+    a.p("Le dossier resultats-personnels contient Atlas-resultats-calcules.xlsx, trois CSV et resultats.json. Pour les jalons 2030, 2035, 2040, 2045 et 2050, attendre 30 lignes nationales, 390 régionales et 675 provinciales hors en-têtes. Chaque somme territoriale de demande retrouve la demande nationale du même scénario.")
+    a.h("3. Vérifier un résultat dans l’interface")
+    a.p("Depuis la racine, lancer python3 demarrer.py (py -3 demarrer.py sous Windows). Dans « Publications », comparer les éditions d’exercice basse et haute. En 2049/2050, M13 doit afficher 1 325 765 et 4 205 603 élèves. En demande centrale, le classeur doit donner 13 522 salles et 18 033 enseignants manquants après intervention combinée.")
+    a.h("Identifier exactement les sources")
+    a.table(["Entrée du calcul","Début de l’empreinte SHA-256"],[
         ["Classeur du Data Challenge",data["workbook"]["sha256"][:24]],
-        *[[label,sources[k]["sha256"][:24]] for k,label in (("annuaire","Annuaire du primaire 2024–2025"),("demographie","Projections démographiques INSD"),("localites","Fichier des localités 2019"))]],[.57,.43],size=8.8)
-    a.note("python3 scripts/importer_provinces.py primaire.pdf projections-insd.pdf localites-insd.pdf")
-    a.h("3. Vérifier les modules et la diffusion")
-    a.p("Lancer python3 scripts/recette_modules.py --navigateur. La recette s’arrête au premier échec, du cadrage M00 à la restauration M14. Elle a validé 54 contrôles affectés aux modules et deux parcours complets en navigateur, en mode local et en mode standard. La découverte intégrale a exécuté 52 tests distincts. Les deux décomptes se recouvrent.")
-    a.p("Le recalcul doit produire 30 lignes nationales, 390 lignes régionales et 675 lignes provinciales pour les cinq jalons. En 2050, les sommes des demandes régionales et provinciales retrouvent exactement chaque total national. La figure 6 archive une étape datée du portail de travail. Les écrans de test sont identifiés dans leurs légendes.")
-    a.note("Moteur "+data["version"]+" · modèle quantile95 · version documentaire du 18 novembre 2026. Le journal figure dans Recette-M00-M14.txt. Pour reconstruire le document, lancer python3 docs/rapport-2050/rapport.py ../outputs/Defi-2050/resultats.json rapport.pdf ou utiliser une sortie rapport.docx.")
+        *[[label,sources[k]["sha256"][:24]] for k,label in (("annuaire","Annuaire du primaire 2024–2025"),("demographie","Projections démographiques INSD"),("localites","Fichier des localités 2019"))]],[.55,.45],size=8.8)
+    a.note("Les empreintes intégrales figurent dans resultats.json. Pour refaire l’extraction des trois PDF avec Poppler ou relancer la recette des modules M00 à M14 et les 57 tests distincts, consulter le "+link("https://github.com/szidama/datachallenge2026/blob/188dd58ba1e444603d3aeace54ef217503719ff6/atlas-education/README.md","guide de reproduction et de vérification")+".")
     a.save()
 
 

@@ -2,6 +2,7 @@
 from io import BytesIO
 from xml.etree import ElementTree
 
+from lxml import etree
 from docx import Document
 from docx.enum.style import WD_STYLE_TYPE
 from docx.enum.table import WD_CELL_VERTICAL_ALIGNMENT, WD_TABLE_ALIGNMENT
@@ -71,6 +72,7 @@ class WordReport:
         self.draw_trend, self.trend_caption = draw_trend, trend_caption
         self.document = Document()
         self.part = None
+        self.pages = 0
         doc = self.document
         doc.core_properties.title = "Salles de classe et enseignants du primaire public en 2050"
         doc.core_properties.subject = "Défi 3 du Data Challenge Burkina Faso"
@@ -96,6 +98,7 @@ class WordReport:
             ("Chapeau","Arial",11.5,15.5,10,GRAY,False),
             ("Légende Atlas","Arial",9,11.9,7,GRAY,False),
             ("Formule Atlas","Georgia",13,17.5,7,GREEN,False),
+            ("Commande Atlas","Courier New",8.8,13,8,INK,False),
             ("Mention Atlas","Arial",8,10,0,GRAY,False),
         ]:
             style = doc.styles[name] if name in doc.styles else doc.styles.add_style(name, WD_STYLE_TYPE.PARAGRAPH)
@@ -132,6 +135,7 @@ class WordReport:
 
     def page(self, part, section, title, subtitle):
         first = self.part is None
+        self.pages += 1
         p = self.document.add_paragraph(style="Heading 1" if self.part != part else "Partie suite")
         p.paragraph_format.page_break_before = not first
         p.add_run(part + "   /   " + section.upper())
@@ -150,6 +154,10 @@ class WordReport:
 
     def formula(self, content):
         rich(self.document.add_paragraph(style="Formule Atlas"),content)
+
+    def code(self, lines):
+        p = self.document.add_paragraph(style="Commande Atlas")
+        p.add_run("\n".join(lines))
 
     def table(self, headers, rows, widths, align_right=(), size=9):
         t = self.document.add_table(rows=0, cols=len(headers))
@@ -217,4 +225,11 @@ class WordReport:
         self.note(self.trend_caption)
 
     def save(self):
+        # L’aperçu de fichiers lit ces propriétés avant le premier recalcul des champs dans Word.
+        part = self.document.part.package.part_related_by(RT.EXTENDED_PROPERTIES)
+        props = etree.fromstring(part.blob)
+        props.find("{*}Pages").text = str(self.pages)
+        text = self.document.element.body.xpath(".//w:t/text()")
+        props.find("{*}Words").text = str(len(" ".join(text).split()))
+        part._blob = etree.tostring(props, encoding="UTF-8", xml_declaration=True, standalone=True)
         self.document.save(self.path)

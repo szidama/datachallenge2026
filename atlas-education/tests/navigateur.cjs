@@ -16,7 +16,9 @@ function otp(secret,offset=0){
   async function capture(target,name) {
    if(!captures)return;
    await page.evaluate(()=>document.fonts.ready);
-   await target.screenshot({path:require('node:path').join(captures,name+'.png'),animations:'disabled'});
+   await page.mouse.move(0,0);
+   await target.screenshot({path:require('node:path').join(captures,name+'.png'),animations:'disabled',caret:'hide',
+    style:'*,*::before,*::after { cursor:none !important; }'});
   }
   const catalogueVide='**/api/public/publications?*';
   await page.route(catalogueVide,route=>route.fulfill({json:{items:[],total:0}}));
