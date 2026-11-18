@@ -1,0 +1,24 @@
+# Instances, remises d’accès et sauvegardes privées
+.instance*/
+instance-privee/
+acces/
+*.sqlite*
+.env
+.env.*
+!.env.example
+
+# Fichiers de travail locaux
+.DS_Store
+~$*
+__pycache__/
+*.py[cod]
+.venv/
+.impeccable/
+
+# Documents de candidature, supports de réunion et captures de travail
+/Note_intention_*.docx
+/Document_du_challenge_Data_Challenge_Burkina.pdf
+/Presentation_Rencontre_en_ligne_Data_Challenge_Burkina.pdf
+/atlas-education-2050-comparaison-regionale.jpg
+/outputs/*.jpg
+/outputs/????????-????-????-????-????????????/

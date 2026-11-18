@@ -1,0 +1,118 @@
+M00  Cadrage et audit
+..
+----------------------------------------------------------------------
+Ran 2 tests in 0.366s
+
+OK
+M01  Socle technique
+.
+----------------------------------------------------------------------
+Ran 1 test in 1.296s
+
+OK
+M02  Comptes et habilitations
+...........
+----------------------------------------------------------------------
+Ran 11 tests in 8.483s
+
+OK
+M03  Référentiels
+...
+----------------------------------------------------------------------
+Ran 3 tests in 0.369s
+
+OK
+M04  Import et qualité
+........
+----------------------------------------------------------------------
+Ran 8 tests in 0.817s
+
+OK
+M05  Validation des données
+...
+----------------------------------------------------------------------
+Ran 3 tests in 2.542s
+
+OK
+M06  Analyses et tableaux de bord
+..
+----------------------------------------------------------------------
+Ran 2 tests in 1.750s
+
+OK
+M07  Prospective 2050
+.......
+----------------------------------------------------------------------
+Ran 7 tests in 1.891s
+
+OK
+M08  Ressources et budgets
+.....
+----------------------------------------------------------------------
+Ran 5 tests in 0.564s
+
+OK
+M09  Simulation et optimisation
+....
+----------------------------------------------------------------------
+Ran 4 tests in 0.021s
+
+OK
+M10  Cartographie et accès
+.
+----------------------------------------------------------------------
+Ran 1 test in 0.000s
+
+OK
+M11  Validation des analyses et décisions
+..
+----------------------------------------------------------------------
+Ran 2 tests in 1.582s
+
+OK
+M12  Publication
+..
+----------------------------------------------------------------------
+Ran 2 tests in 1.790s
+
+OK
+M13  Portail public
+..
+----------------------------------------------------------------------
+Ran 2 tests in 2.136s
+
+OK
+M14  Exploitation et restauration
+.
+----------------------------------------------------------------------
+Ran 1 test in 0.996s
+
+OK
+Fiches publiques · 13 régions, catalogue vide ou indisponible et séries régionales issues d’une édition antérieure.
+Comparaison publique vérifiée en 2050 [ 'Étude A · demande basse', 'Étude B · demande haute' ] 1325765 4205603
+Comparaison publique vérifiée en 2050 [ 'Étude B · demande haute', 'Étude A · demande basse' ] 4205603 1325765
+Comparaison publique vérifiée en 2050 [ 'Étude C · demande centrale', 'Étude B · demande haute' ] 2391345 4205603
+M13 · filtrage des provinces dans une édition diffusée sur le portail de recette.
+Portail publié · vue nationale, fiche du Centre, comparaison de 2 scénarios, catalogue et téléchargement.
+Gestionnaire · dictionnaire, contrôles et prévisualisation effective du XLSX.
+Source retournée · ouverture sur la bonne version, correction de la valeur et création du brouillon.
+Administrateur · neuf rubriques ouvertes, avec les formulaires de décision, de publication et d’habilitation.
+Droits vérifiés · modification directe par l’administrateur, accès au journal et refus de la gestion des rôles.
+Analyste · scénario calculé, réouverture du dossier et 13 arbitrages régionaux.
+Validation et publication · deux retours motivés, recalcul, vérification indépendante et lecture de la version corrigée sur le portail.
+Mon profil · coordonnées persistantes, changement des accès et reconnexion sur mobile.
+Affichage mobile contrôlé et aucune erreur JavaScript.
+Fiches publiques · 13 régions, catalogue vide ou indisponible et séries régionales issues d’une édition antérieure.
+Comparaison publique vérifiée en 2050 [ 'Étude A · demande basse', 'Étude B · demande haute' ] 1325765 4205603
+Comparaison publique vérifiée en 2050 [ 'Étude B · demande haute', 'Étude A · demande basse' ] 4205603 1325765
+Comparaison publique vérifiée en 2050 [ 'Étude C · demande centrale', 'Étude B · demande haute' ] 2391345 4205603
+M13 · filtrage des provinces dans une édition diffusée sur le portail de recette.
+Portail publié · vue nationale, fiche du Centre, comparaison de 2 scénarios, catalogue et téléchargement.
+Gestionnaire · dictionnaire, contrôles et prévisualisation effective du XLSX.
+Source retournée · ouverture sur la bonne version, correction de la valeur et création du brouillon.
+Administrateur · neuf rubriques ouvertes, avec les formulaires de décision, de publication et d’habilitation.
+Droits vérifiés · modification directe par l’administrateur, accès au journal et refus de la gestion des rôles.
+Analyste · scénario calculé, réouverture du dossier et 13 arbitrages régionaux.
+Validation et publication · deux retours motivés, recalcul, vérification indépendante et lecture de la version corrigée sur le portail.
+Mon profil · coordonnées persistantes, changement des accès et reconnexion sur mobile.
+Affichage mobile contrôlé et aucune erreur JavaScript.

@@ -1,0 +1,9 @@
+# Conserver les octets des documents et des jeux de données de référence.
+*.pdf binary
+*.docx binary
+*.xlsx binary
+*.png binary
+*.jpg binary
+*.webp binary
+*.woff2 binary
+*.csv -text whitespace=trailing-space,space-before-tab,cr-at-eol
