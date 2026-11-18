@@ -232,6 +232,8 @@ class Handler(BaseHTTPRequestHandler):
                 content=file.read_bytes()
                 if segments==["admin"] and self.server.local_demo:
                     content=content.replace(b'data-connexion="standard"',b'data-connexion="demo-locale"',1)
+                if segments==["admin"] and getattr(self.server,"personal_instance",False):
+                    content=content.replace(b"<html ",b'<html data-instance="personnelle" ',1)
                 self.send_content(200,content,mimetypes.guess_type(str(file))[0] or "application/octet-stream");return
             parts=segments[1:];method="GET" if self.command=="HEAD" else self.command
             db=connect(self.server.state)
@@ -290,10 +292,11 @@ class Handler(BaseHTTPRequestHandler):
             if db:db.close()
     do_GET=do_POST=do_HEAD=run
 
-def make_server(state,host="127.0.0.1",port=8050,web=None,origin=None,*,local_demo=False):
+def make_server(state,host="127.0.0.1",port=8050,web=None,origin=None,*,local_demo=False,personal_instance=False):
     check(not local_demo or (host=="127.0.0.1" and not origin),422,"La démonstration locale requiert 127.0.0.1 et aucune origine de proxy.")
     server=ThreadingHTTPServer((host,port),Handler)
     server.local_demo=local_demo
+    server.personal_instance=personal_instance
     server.state=Path(state);server.web=Path(web or d.ROOT/"web");server.origin=origin
     server.secure_cookie=bool(origin and origin.startswith("https://"))
     server.demo_path=Path(os.environ.get("ATLAS_DEMO_CSV",str(d.ROOT.parent/"synthetic_demo.csv")))

@@ -1,0 +1,10 @@
+{
+  "name": "Atlas Éducation 2050",
+  "image": "mcr.microsoft.com/devcontainers/python:1-3.12-bookworm",
+  "forwardPorts": [8051],
+  "portsAttributes": {
+    "8051": { "label": "Atlas Éducation", "onAutoForward": "openBrowserOnce" }
+  },
+  "postStartCommand": "python3 demarrer.py preparer && (nohup python3 -u demarrer.py --sans-navigateur > .instance-atlas/serveur.log 2>&1 < /dev/null &)",
+  "waitFor": "postStartCommand"
+}

@@ -2,17 +2,13 @@
 
 Atlas Éducation est une plateforme locale de planification du primaire et du préscolaire publics. Elle met en relation les séries du classeur, des hypothèses de demande, les stocks de salles et d’enseignants et des options d’intervention. Le périmètre est celui des 13 régions historiques du classeur. L’historique se termine en 2024/2025 et la prospective produit un résultat pour chacune des 25 années scolaires suivantes.
 
-## Ouvrir la plateforme sur ce Mac
+## Accéder à la plateforme
 
-Double-cliquez sur **Ouvrir Atlas Éducation.command**. Le lanceur démarre la démonstration sur ce poste ou retrouve le service à l’adresse **http://127.0.0.1:8050/**. Appuyez sur Entrée pour consulter le portail. Pour essayer le back-office, choisissez **1 · Analyste** ou **3 · Administrateur**. Le terminal ouvre la page de connexion et affiche l’identifiant et le mot de passe du profil choisi.
+Depuis une copie du dépôt, le lanceur prépare une instance personnelle avec un administrateur national, cinq comptes métier et trois éditions d’exercice. Le portail public donne accès aux fiches des territoires et à la comparaison des scénarios bas, central et haut du primaire public en 2050. Les titres et le journal identifient les publications réalisées pour l’exercice. [Ouvrir Atlas dans le navigateur ou sur son ordinateur](../README.md#ouvrir-atlas-depuis-github)
 
-Sur l’écran de connexion de la démonstration, **Afficher les accès de l’administrateur** permet de sélectionner le fichier privé `.instance-locale/acces/administrateur.json`. Le navigateur affiche l’identifiant et le mot de passe sur ce poste. Cliquez sur **Se connecter** pour ouvrir la session.
+Sur macOS, le double-clic sur **Ouvrir Atlas Éducation.command** lance cette même instance. Si le poste possède déjà une installation dans `../.instance-locale/`, le raccourci retrouve son espace de travail sur le port 8050. Le lanceur `../demarrer.py` ouvre toujours l’instance personnelle du dépôt sur le port 8051 par défaut.
 
-Chaque titulaire peut ouvrir **Mon profil** dans le menu du back-office pour renseigner ou modifier son prénom, son nom de famille et son téléphone. La rubrique **Identifiant et mot de passe** demande le mot de passe actuel. Le changement de l’un de ces accès ferme les sessions du compte et invite le titulaire à se reconnecter. Le fichier de remise contient les accès initiaux. Le lanceur retrouve l’identifiant actuel et invite le titulaire à saisir le mot de passe qu’il a choisi.
-
-Les profils de démonstration ont des fonctions distinctes. **Analyste** ouvre les tableaux, les projections et le comparateur. **Gestionnaire** prévisualise les sources, soumet des versions et prépare les corrections. **Administrateur** accède à tous les modules dans son périmètre, de l’import des données à la publication, ainsi qu’aux habilitations et au journal. Ce profil crée directement les comptes et modifie leur rôle, leurs permissions et leur territoire. Le journal enregistre chaque modification. Les contrôles indépendants de validation métier et de publication restent applicables. Les trois remises initiales sont privées au compte local du poste. Le mode démonstration réunit leurs moyens d’accès sur ce poste pour la prise en main. Pour un usage institutionnel, initialiser une instance distincte, remettre chaque accès à son titulaire et enrôler son application d’authentification.
-
-L’instance livrée contient le classeur en brouillon, ses observations et le complément de démonstration. Les résultats calculés restent consultables dans **Programmation et rapports**. Le portail montre la carte et ses 13 fiches territoriales. Les séries apparaissent à l’issue du circuit de publication. Aucun dossier de travail de cette instance n’a reçu de validation institutionnelle.
+Le compte administrateur accède à tous les modules nationaux et gère directement les habilitations. Pour exercer chaque signature du circuit, utilisez le compte métier correspondant. Chaque titulaire peut modifier ses coordonnées, son identifiant et son mot de passe dans **Mon profil**. Une modification des accès ferme les sessions du titulaire.
 
 ## Trois parcours
 
@@ -33,18 +29,11 @@ Le jeu `../synthetic_demo.csv` est la proposition intégrée pour le **primaire 
 
 Chaque ligne porte sa méthode, son unité, son origine, sa version et sa graine. La version fournie est conservée. Un générateur alternatif permet de tester d’autres ventilations avec une graine et un poids réglables. Un CSV de terrain peut ensuite apporter des effectifs régionaux, des stocks réellement utilisables, des coûts et des budgets. Son intégration produit une nouvelle version à faire valider. [Dictionnaire, méthodes, exemples chiffrés et commandes de génération](ingestion/README.md)
 
-## Démarrer sur un autre poste
+## Installation et exploitation
 
-Placer le classeur et le CSV à côté du dossier `atlas-education`. Depuis ce dossier, avec Python 3.12 et un environnement virtuel activé, exécuter les commandes suivantes. Sans terminal interactif, le lanceur initialise puis démarre le service et affiche ses adresses. Sur un autre système, employer le lanceur Python directement.
+L’installation personnelle se lance depuis la racine du dépôt avec `python3 demarrer.py` ou, sous Windows, `py -3 demarrer.py`. Les deux bibliothèques nécessaires à Excel sont fournies dans `vendor/` avec leurs licences. Le lanceur vérifie les empreintes des archives lors de l’installation. La base et les remises sont conservées dans `../.instance-atlas/`. [openpyxl 3.1.5](https://pypi.org/project/openpyxl/3.1.5/) · [et-xmlfile 2.0.0](https://pypi.org/project/et-xmlfile/2.0.0/)
 
-```sh
-python3 -m venv .venv
-. .venv/bin/activate
-python -m pip install -r requirements.txt
-python scripts/demonstration.py
-```
-
-La base et les remises du mode démonstration résident dans `../.instance-locale/`, hors du répertoire web. Le service reste local après la fermeture du terminal de remise. Le démarrage d’une instance avec des titulaires distincts, les variables d’environnement, la journalisation, les sauvegardes et la restauration sont décrits dans le [guide d’exploitation](server/EXPLOITATION.md).
+Pour une installation institutionnelle avec des titulaires nominatifs, suivez les commandes de création, de sauvegarde et de restauration du service. [Guide d’exploitation](server/EXPLOITATION.md)
 
 ## Architecture et références de maintenance
 
@@ -69,18 +58,18 @@ Dans **Comparateur d’interventions**, choisir le primaire public et la source 
 
 Le jalon principal est 2050. La série des 6–11 ans de l’INSD s’arrête en 2035. Au-delà, la répartition utilise les derniers poids démographiques disponibles. Le diagnostic territorial à inventaire constant et le calendrier de simulation régionale ont des interprétations distinctes.
 
-Depuis ce dossier, les commandes suivantes reproduisent les cinq jalons et la recette ordonnée. Le dernier argument du calcul désigne le dossier de sortie.
+Une fois Atlas démarré au moins une fois, les commandes suivantes reproduisent les cinq jalons puis vérifient les modules. Exécutez-les depuis le dossier `atlas-education`. Sous Windows, remplacez `../.venv/bin/python` par `..\.venv\Scripts\python.exe`.
 
 ```sh
-python3 scripts/reproduire_defi.py ../DONNEES*.xlsx ../outputs/Defi-2050
-python3 scripts/recette_modules.py --navigateur
+../.venv/bin/python scripts/reproduire_defi.py "../DONNEES_STATISTQUES_ PRESCOLAIRE ET PRIMAIRE_2016_2025_DCB.xlsx" ../resultats-personnels --excel
+../.venv/bin/python scripts/recette_modules.py
 ```
 
-La vérification en navigateur utilise Node.js et Playwright avec Chromium. Pour une installation séparée, définir `ATLAS_PLAYWRIGHT` vers le module Playwright et, si nécessaire, `ATLAS_CHROME` vers l’exécutable Chrome. Les deux modes d’authentification sont exercés sur des bases temporaires.
+Le dossier de sortie contient les CSV, les résultats JSON et le classeur Excel **Atlas-resultats-calcules.xlsx**. Ses quatre feuilles présentent les résultats nationaux, régionaux, provinciaux et les hypothèses à partir des bibliothèques fournies. L’option `--navigateur` de la recette ajoute les parcours interactifs avec Node.js, Playwright et Chromium. Pour une installation séparée, définir `ATLAS_PLAYWRIGHT` vers le module Playwright et, si nécessaire, `ATLAS_CHROME` vers l’exécutable Chrome.
 
 Le rapport scientifique reprend les sept parties du défi en 14 pages. Depuis ce dossier, générer la version PDF avec `python3 docs/rapport-2050/rapport.py ../outputs/Defi-2050/resultats.json ../outputs/Rapport-scientifique-Atlas-2050.pdf` (ReportLab). La même commande avec une destination `.docx` produit la version Word éditable et utilise également python-docx, Pillow et pypdfium2. Les deux versions partagent les chiffres, le texte, les figures et les sources.
 
-Les captures de référence sont incluses dans `docs/rapport-2050/figures`. Les captures de test se reproduisent avec `python3 tests/verifier_interface.py --demo-locale --captures docs/rapport-2050/figures`. La capture du circuit de diffusion est un constat daté du portail de travail. Le classeur Excel s’exporte avec `node docs/rapport-2050/classeur.mjs ../outputs/Defi-2050/resultats.json ../outputs/Defi-2050/Atlas-primaire-public-2050.xlsx` et le module `@oai/artifact-tool`.
+Les captures de référence sont incluses dans `docs/rapport-2050/figures`. Les captures de test se reproduisent avec `python3 tests/verifier_interface.py --demo-locale --captures docs/rapport-2050/figures`. La capture du circuit de diffusion est un constat daté du portail de travail. La version mise en page du classeur scientifique est également fournie dans le dépôt. [Classeur illustrant le rapport](../outputs/Defi-2050/Atlas-primaire-public-2050.xlsx)
 
 Pour reconstruire le référentiel depuis les rapports officiels avec Poppler, utiliser `python3 scripts/importer_provinces.py primaire.pdf projections-insd.pdf localites-insd.pdf`. Les trois liens et les empreintes SHA-256 figurent dans `planning/data/provinces_2025.json`. La documentation scientifique et les résultats de la recette sont livrés dans le dossier `outputs` du projet.
 

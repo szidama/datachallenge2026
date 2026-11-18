@@ -23,6 +23,10 @@ async function protect(url,body){
 const get=path=>protect('/api/private/'+path),post=(path,data)=>protect('/api/private/'+path,data);
 function login(note='',username='',accessChanged=false){
  const localDemo=document.documentElement.dataset.connexion==='demo-locale';
+ const personnel=document.documentElement.dataset.instance==='personnelle';
+ const commande=localDemo&&/Win/.test(navigator.platform)?'py -3':'python3';
+ const aide=personnel?`<p class="hint">${localDemo?'Dans un second terminal, depuis le dossier du dépôt':'Dans le terminal de votre Codespace'}, tapez
+   <code>${commande} demarrer.py acces</code> pour afficher vos accès administrateur${localDemo?'':' et votre code temporaire'}.</p>`:'';
  const code=localDemo?'':field('otp','Code de l’application d’authentification','text','','required autocomplete="one-time-code" inputmode="numeric" pattern="[0-9]{6}" maxlength="6" placeholder="6 chiffres"');
  const localAccess=localDemo?`<details class="local-access"><summary>Afficher les accès de l’administrateur</summary>
    <p class="hint">Ce fichier contient les accès initiaux. Si vous les avez modifiés dans Mon profil, saisissez vos accès actuels.</p>
@@ -31,7 +35,7 @@ function login(note='',username='',accessChanged=false){
  document.title='Connexion · Atlas Éducation';
  resetMenu=null;
  by('shell').innerHTML=`<header class="work-top login-top">${brand}<a class="btn small" href="/">Portail public ${icon('external',15)}</a></header>
-  <main id="main" tabindex="-1" class="login-wrap"><section class="login-form"><h1>Connexion</h1><p>Accédez à votre espace de travail Atlas Éducation.</p>
+  <main id="main" tabindex="-1" class="login-wrap"><section class="login-form"><h1>Connexion</h1><p>Accédez à votre espace de travail Atlas Éducation.</p>${aide}
   <form id="signin" class="stack">
    ${accessChanged?'<p class="notice" role="status">Vos accès ont été modifiés. Reconnectez-vous.</p>':''}
    ${accessChanged&&!localDemo?'<p class="hint">Si vous venez d’utiliser votre code temporaire, attendez le prochain code de votre application.</p>':''}

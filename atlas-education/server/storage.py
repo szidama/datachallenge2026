@@ -147,6 +147,22 @@ def permit(u,sc):
 def password_verifier(password,salt):
     return hashlib.scrypt(password.encode(),salt=salt,n=2**15,r=8,p=1,maxmem=64*1024**2)
 
+def current_handoff(state, account):
+    """Relit les accès initiaux encore valables après les changements de profil."""
+    db = sqlite3.connect((state / "atlas.sqlite").resolve().as_uri() + "?mode=ro", uri=True)
+    db.row_factory = sqlite3.Row
+    try:
+        row = db.execute("""SELECT u.username,c.salt,c.verifier,c.totp FROM users u
+                            JOIN credentials c ON c.user_id=u.id WHERE u.id=? AND u.status='active'""",
+                         (account["id"],)).fetchone()
+        if not row:
+            return None
+        valid = hmac.compare_digest(password_verifier(account["password"], row["salt"]), row["verifier"])
+        return {"username": row["username"], "password": account["password"] if valid else None,
+                "totp_secret": account["totp_secret"] if account["totp_secret"] == row["totp"] else None}
+    finally:
+        db.close()
+
 def credentials(db,user_id):
     password=secrets.token_urlsafe(20)
     salt=secrets.token_bytes(16)

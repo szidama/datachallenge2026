@@ -6,4 +6,5 @@
 *.jpg binary
 *.webp binary
 *.woff2 binary
+*.whl binary
 *.csv -text whitespace=trailing-space,space-before-tab,cr-at-eol

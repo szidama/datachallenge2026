@@ -1,8 +1,6 @@
 """Ouvre l’instance locale de démonstration et remet les accès à l’utilisateur du poste."""
 import json
-import hmac
 import os
-import sqlite3
 import subprocess
 import sys
 import time
@@ -12,6 +10,9 @@ import webbrowser
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT))
+from server.storage import current_handoff
+
 STATE = ROOT.parent / ".instance-locale"
 ACCESS = STATE / "acces"
 PORT = 8050
@@ -62,24 +63,9 @@ def start():
     raise RuntimeError(f"Le service n’a pas démarré. Consulter {STATE / 'serveur.log'}.")
 
 
-def current_handoff(state, account):
-    from server.storage import password_verifier
-    db = sqlite3.connect((state / "atlas.sqlite").resolve().as_uri() + "?mode=ro", uri=True)
-    db.row_factory = sqlite3.Row
-    try:
-        row = db.execute("""SELECT u.username,c.salt,c.verifier,c.totp FROM users u
-                            JOIN credentials c ON c.user_id=u.id WHERE u.id=? AND u.status='active'""",
-                         (account["id"],)).fetchone()
-        if not row:
-            return None
-        valid = hmac.compare_digest(password_verifier(account["password"], row["salt"]), row["verifier"])
-        return {"username": row["username"], "password": account["password"] if valid else None,
-                "totp_secret": account["totp_secret"] if account["totp_secret"] == row["totp"] else None}
-    finally:
-        db.close()
-
-
 def main():
+    if not STATE.exists():
+        return subprocess.call([sys.executable, str(ROOT.parent / "demarrer.py")])
     bootstrap()
     mode = start()
     print(f"Atlas Éducation · Démonstration sur ce poste\nPortail public  {ADDRESS}/\nEspace privé   {ADDRESS}/admin")
@@ -96,7 +82,6 @@ def main():
         print("Accès remis séparément par votre administrateur.")
         webbrowser.open(ADDRESS + "/admin")
         return
-    sys.path.insert(0, str(ROOT))
     account = current_handoff(STATE, json.loads(credentials.read_text()))
     webbrowser.open(ADDRESS + "/admin")
     if account is None:
@@ -119,7 +104,7 @@ def main():
 
 if __name__ == "__main__":
     try:
-        main()
+        sys.exit(main())
     except (OSError, RuntimeError, subprocess.CalledProcessError) as exc:
         print(exc, file=sys.stderr)
         sys.exit(1)
